@@ -1,9 +1,14 @@
 #include "Calculator.h"
+#include "errors.h"
 
 #include <cstdint>
 #include <limits>
 
 std::int32_t Calculator::average(const Vector& v) const {
+    if (v.empty()) {
+        throw ServerError("Empty vector");
+    }
+
     std::int64_t sum = 0;
 
     for (std::int32_t x : v) {
