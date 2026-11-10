@@ -20,6 +20,14 @@ void AuthBase::load(const std::string& fileName) {
             continue;
         }
 
+        if (line.find_first_not_of(" \t") == std::string::npos) {
+            continue;
+        }
+
+        if (line[0] == '#') {
+            continue;
+        }
+
         std::size_t pos = line.find(':');
 
         if (pos == std::string::npos) {
