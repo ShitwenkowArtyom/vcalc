@@ -1,6 +1,6 @@
 #include <UnitTest++/UnitTest++.h>
 #include <UnitTest++/TestReporter.h>
-#include <cstdio>
+#include <iostream>
 #include <fstream>
 #include <string>
 #include <cstring>
@@ -63,44 +63,50 @@ public:
     void ReportTestStart(UnitTest::TestDetails const& details) override {
         int num = findTestNumber(details.testName);
         if (num > 0) {
-            printf("Тест #%d: %s\n", num, testList[num-1].description);
+            std::cout << "Тест #" << num << ": " << testList[num-1].description << std::endl;
         }
     }
 
     void ReportFailure(UnitTest::TestDetails const& details, char const* failure) override {
         int num = findTestNumber(details.testName);
-        printf("\n!!! ОШИБКА В ТЕСТЕ #%d !!!\n", num);
-        printf("  %s\n", failure);
-        printf("  Файл: %s, строка: %d\n", details.filename, details.lineNumber);
+        std::cout << "\n!!! ОШИБКА В ТЕСТЕ #" << num << " !!!" << std::endl;
+        std::cout << "  " << failure << std::endl;
+        std::cout << "  Файл: " << details.filename << ", строка: " << details.lineNumber << std::endl;
     }
 
     void ReportTestFinish(UnitTest::TestDetails const& /*details*/, float /*secondsElapsed*/) override {
     }
 
-    void ReportSummary(int totalTestCount, int failedTestCount, int failureCount, float /*secondsElapsed*/) override {
-        printf("\n========================================\n");
-        printf("ИТОГО: %d тестов, %d упало, всего ошибок: %d\n", totalTestCount, failedTestCount, failureCount);
-        printf("========================================\n");
+    void ReportSummary(int totalTestCount, int failedTestCount, int failureCount, float secondsElapsed) override {
+        std::cout << "\n========================================" << std::endl;
+        std::cout << "ИТОГО: " << totalTestCount << " тестов, " 
+                  << failedTestCount << " упало, всего ошибок: " 
+                  << failureCount << std::endl;
+        std::cout << "Время выполнения: " << secondsElapsed << " секунд" << std::endl;
+        std::cout << "========================================" << std::endl;
     }
 };
 
 void printTestInfo() {
-    printf("========================================\n");
-    printf("СПРАВКА О МОДУЛЬНЫХ ТЕСТАХ\n");
-    printf("========================================\n\n");
-    printf("Всего тестов: %d\n\n", testCount);
+    std::cout << "========================================" << std::endl;
+    std::cout << "СПРАВКА О МОДУЛЬНЫХ ТЕСТАХ" << std::endl;
+    std::cout << "========================================" << std::endl;
+    std::cout << std::endl;
+    std::cout << "Всего тестов: " << testCount << std::endl;
+    std::cout << std::endl;
 
     for (int i = 0; i < testCount; i++) {
-        printf("Тест #%d\n", testList[i].number);
-        printf("  Набор: %s\n", testList[i].suite);
-        printf("  Имя: %s\n", testList[i].name);
-        printf("  Описание: %s\n", testList[i].description);
-        printf("\n");
+        std::cout << "Тест #" << testList[i].number << std::endl;
+        std::cout << "  Набор: " << testList[i].suite << std::endl;
+        std::cout << "  Имя: " << testList[i].name << std::endl;
+        std::cout << "  Описание: " << testList[i].description << std::endl;
+        std::cout << std::endl;
     }
 
-    printf("========================================\n");
-    printf("ЗАПУСК ТЕСТОВ\n");
-    printf("========================================\n\n");
+    std::cout << "========================================" << std::endl;
+    std::cout << "ЗАПУСК ТЕСТОВ" << std::endl;
+    std::cout << "========================================" << std::endl;
+    std::cout << std::endl;
 }
 
 SUITE(CalculatorTests) {
