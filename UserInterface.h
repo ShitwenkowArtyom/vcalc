@@ -12,8 +12,8 @@ public:
 
     std::string getDescription() const;
 
+    bool parse(int argc, const char** argv);
+
 private:
     Params params;
-
-    bool parse(int argc, const char** argv);
 };

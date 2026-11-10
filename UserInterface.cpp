@@ -28,6 +28,8 @@ UserInterface::UserInterface() {
 }
 
 bool UserInterface::parse(int argc, const char** argv) {
+    bool hasRun = false;
+
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
 
@@ -35,7 +37,9 @@ bool UserInterface::parse(int argc, const char** argv) {
             return false;
         }
 
-        if (arg == "-b" || arg == "--base") {
+        if (arg == "--run") {
+            hasRun = true;
+        } else if (arg == "-b" || arg == "--base") {
             if (i + 1 >= argc) {
                 throw ServerError("No value for option " + arg);
             }
@@ -66,12 +70,13 @@ bool UserInterface::parse(int argc, const char** argv) {
         throw ServerError("Bad port");
     }
 
-    return true;
+    return hasRun;
 }
 
 std::string UserInterface::getDescription() const {
     return "Usage: server [options]\n"
            "  -h, --help          Show this help\n"
+           "  --run               Run server (required to start)\n"
            "  -b, --base <file>   Auth base file (default: ~/base/vcalc.conf)\n"
            "  -l, --log <file>    Log file (default: ~/log/vcalc.log)\n"
            "  -p, --port <port>   Server port (default: 33333)\n";
