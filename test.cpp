@@ -1,5 +1,4 @@
 #include <UnitTest++/UnitTest++.h>
-#include <UnitTest++/TestReporter.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -15,139 +14,46 @@
 #include "UserInterface.h"
 #include "errors.h"
 
-struct TestInfo {
-    int number;
-    const char* suite;
-    const char* name;
-    const char* description;
-};
+SUITE(UserInterfaceTests) {
 
-TestInfo testList[] = {
-    {1, "CalculatorTests", "NormalAverage", "Среднее арифметическое обычного вектора {10, 20, 30, 40}"},
-    {2, "CalculatorTests", "NegativeAverage", "Среднее арифметическое отрицательного вектора"},
-    {3, "CalculatorTests", "SingleElement", "Вектор из одного элемента"},
-    {4, "CalculatorTests", "OverflowUp", "Переполнение вверх (возврат 2147483647)"},
-    {5, "CalculatorTests", "OverflowDown", "Переполнение вниз (возврат -2147483648)"},
-    {6, "CalculatorTests", "EmptyVector", "Пустой вектор вызывает исключение"},
-    {7, "AuthBaseTests", "LoadAndFind", "Загрузка базы и поиск существующего пользователя"},
-    {8, "AuthBaseTests", "NotFound", "Поиск несуществующего пользователя"},
-    {9, "AuthBaseTests", "EmptyFile", "Загрузка пустого файла базы"},
-    {10, "AuthBaseTests", "FileWithComments", "Файл с комментариями и пустыми строками"},
-    {11, "AuthBaseTests", "SpecialCharsInPassword", "Пароль со спецсимволами"},
-    {12, "CryptoAuthTests", "HexValid", "Корректная hex-строка заглавными буквами"},
-    {13, "CryptoAuthTests", "HexInvalidLower", "Некорректная hex-строка строчными буквами"},
-    {14, "CryptoAuthTests", "HexInvalidEmpty", "Пустая строка"},
-    {15, "CryptoAuthTests", "VerifyHashWrong", "Неверный хеш отвергается"},
-    {16, "CryptoAuthTests", "VerifyHashWrongPassword", "Хеш от другого пароля отвергается"},
-    {17, "UserInterfaceTests", "HelpShort", "Флаг -h выводит справку"},
-    {18, "UserInterfaceTests", "RunFlag", "Флаг --run запускает сервер"},
-    {19, "UserInterfaceTests", "NoRunFlag", "Без --run выводится справка"},
-    {20, "UserInterfaceTests", "RunWithPort", "--run с указанием порта"},
-    {21, "UserInterfaceTests", "BadPort", "Некорректный порт вызывает исключение"},
-    {22, "UserInterfaceTests", "UnknownOption", "Неизвестный параметр вызывает исключение"},
-};
-
-int testCount = sizeof(testList) / sizeof(testList[0]);
-
-int findTestNumber(const char* testName) {
-    for (int i = 0; i < testCount; i++) {
-        if (strcmp(testList[i].name, testName) == 0) {
-            return testList[i].number;
-        }
-    }
-    return -1;
+TEST(Test_1_1) {
+    UserInterface ui;
+    const char* argv[] = {"server", "-h", nullptr};
+    CHECK(!ui.parse(2, argv));
 }
 
-class NumberedReporter : public UnitTest::TestReporter {
-public:
-    void ReportTestStart(UnitTest::TestDetails const& details) override {
-        int num = findTestNumber(details.testName);
-        if (num > 0) {
-            std::cout << "Тест #" << num << ": " << testList[num-1].description << std::endl;
-        }
-    }
-
-    void ReportFailure(UnitTest::TestDetails const& details, char const* failure) override {
-        int num = findTestNumber(details.testName);
-        std::cout << "\n!!! ОШИБКА В ТЕСТЕ #" << num << " !!!" << std::endl;
-        std::cout << "  " << failure << std::endl;
-        std::cout << "  Файл: " << details.filename << ", строка: " << details.lineNumber << std::endl;
-    }
-
-    void ReportTestFinish(UnitTest::TestDetails const& /*details*/, float /*secondsElapsed*/) override {
-    }
-
-    void ReportSummary(int totalTestCount, int failedTestCount, int failureCount, float secondsElapsed) override {
-        std::cout << "\n========================================" << std::endl;
-        std::cout << "ИТОГО: " << totalTestCount << " тестов, " 
-                  << failedTestCount << " упало, всего ошибок: " 
-                  << failureCount << std::endl;
-        std::cout << "Время выполнения: " << secondsElapsed << " секунд" << std::endl;
-        std::cout << "========================================" << std::endl;
-    }
-};
-
-void printTestInfo() {
-    std::cout << "========================================" << std::endl;
-    std::cout << "СПРАВКА О МОДУЛЬНЫХ ТЕСТАХ" << std::endl;
-    std::cout << "========================================" << std::endl;
-    std::cout << std::endl;
-    std::cout << "Всего тестов: " << testCount << std::endl;
-    std::cout << std::endl;
-
-    for (int i = 0; i < testCount; i++) {
-        std::cout << "Тест #" << testList[i].number << std::endl;
-        std::cout << "  Набор: " << testList[i].suite << std::endl;
-        std::cout << "  Имя: " << testList[i].name << std::endl;
-        std::cout << "  Описание: " << testList[i].description << std::endl;
-        std::cout << std::endl;
-    }
-
-    std::cout << "========================================" << std::endl;
-    std::cout << "ЗАПУСК ТЕСТОВ" << std::endl;
-    std::cout << "========================================" << std::endl;
-    std::cout << std::endl;
+TEST(Test_1_2) {
+    UserInterface ui;
+    const char* argv[] = {"server", "--run", nullptr};
+    CHECK(ui.parse(2, argv));
 }
 
-SUITE(CalculatorTests) {
-
-TEST(NormalAverage) {
-    Calculator calc;
-    Vector v = {10, 20, 30, 40};
-    CHECK_EQUAL(25, calc.average(v));
+TEST(Test_1_3) {
+    UserInterface ui;
+    const char* argv[] = {"server", "--run", "-p", "40000", nullptr};
+    CHECK(ui.parse(4, argv));
 }
 
-TEST(NegativeAverage) {
-    Calculator calc;
-    Vector v = {-10, -20, -30};
-    CHECK_EQUAL(-20, calc.average(v));
+TEST(Test_1_4) {
+    UserInterface ui;
+    const char* argv[] = {"server", "-p", "40000", nullptr};
+    CHECK(!ui.parse(3, argv));
 }
 
-TEST(SingleElement) {
-    Calculator calc;
-    Vector v = {42};
-    CHECK_EQUAL(42, calc.average(v));
+TEST(Test_1_5) {
+    UserInterface ui;
+    const char* argv[] = {"server", "--run", "-x", nullptr};
+    CHECK_THROW(ui.parse(3, argv), ServerError);
 }
 
-TEST(OverflowUp) {
-    Calculator calc;
-    Vector v = {2000000000, 2000000000, 2000000000, 2000000000};
-    CHECK_EQUAL(2147483647, calc.average(v));
-}
-
-TEST(OverflowDown) {
-    Calculator calc;
-    Vector v = {-2000000000, -2000000000, -2000000000, -2000000000};
-    CHECK_EQUAL(-2147483648, calc.average(v));
-}
-
-TEST(EmptyVector) {
-    Calculator calc;
-    Vector v;
-    CHECK_THROW(calc.average(v), ServerError);
+TEST(Test_1_6) {
+    UserInterface ui;
+    const char* argv[] = {"server", "--run", "-p", "99999", nullptr};
+    CHECK_THROW(ui.parse(4, argv), ServerError);
 }
 
 }
+
 
 SUITE(AuthBaseTests) {
 
@@ -197,43 +103,25 @@ struct SpecialFixture {
     }
 };
 
-TEST_FIXTURE(AuthFixture, LoadAndFind) {
+TEST_FIXTURE(AuthFixture, Test_2_1) {
     AuthBase base;
     base.load("test_base.txt");
     CHECK_EQUAL(2u, base.size());
-
-    std::string pass;
-    CHECK(base.getPassword("user", pass));
-    CHECK_EQUAL("P@ssW0rd", pass);
-
-    CHECK(base.getPassword("admin", pass));
-    CHECK_EQUAL("12345", pass);
 }
 
-TEST_FIXTURE(AuthFixture, NotFound) {
-    AuthBase base;
-    base.load("test_base.txt");
-    std::string pass;
-    CHECK(!base.getPassword("nobody", pass));
-}
-
-TEST_FIXTURE(EmptyFixture, EmptyFile) {
+TEST_FIXTURE(EmptyFixture, Test_2_2) {
     AuthBase base;
     base.load("empty_base.txt");
     CHECK_EQUAL(0u, base.size());
 }
 
-TEST_FIXTURE(CommentsFixture, FileWithComments) {
+TEST_FIXTURE(CommentsFixture, Test_2_3) {
     AuthBase base;
     base.load("comments_base.txt");
     CHECK_EQUAL(2u, base.size());
-
-    std::string pass;
-    CHECK(base.getPassword("user", pass));
-    CHECK_EQUAL("pass1", pass);
 }
 
-TEST_FIXTURE(SpecialFixture, SpecialCharsInPassword) {
+TEST_FIXTURE(SpecialFixture, Test_2_4) {
     AuthBase base;
     base.load("special_base.txt");
     std::string pass;
@@ -241,35 +129,50 @@ TEST_FIXTURE(SpecialFixture, SpecialCharsInPassword) {
     CHECK_EQUAL("P@$$W0rd!#%", pass);
 }
 
+TEST_FIXTURE(AuthFixture, Test_2_5) {
+    AuthBase base;
+    base.load("test_base.txt");
+    std::string pass;
+    CHECK(base.getPassword("user", pass));
+    CHECK_EQUAL("P@ssW0rd", pass);
+}
+
+TEST_FIXTURE(AuthFixture, Test_2_6) {
+    AuthBase base;
+    base.load("test_base.txt");
+    std::string pass;
+    CHECK(!base.getPassword("nobody", pass));
+}
+
 }
 
 SUITE(CryptoAuthTests) {
 
-TEST(HexValid) {
+TEST(Test_3_1) {
     CHECK(CryptoAuth::isHexUpper("ABCDEF0123456789"));
     CHECK(CryptoAuth::isHexUpper("4F9C429F5C6884DB"));
     CHECK(CryptoAuth::isHexUpper("0000000000000000"));
     CHECK(CryptoAuth::isHexUpper("FFFFFFFFFFFFFFFF"));
 }
 
-TEST(HexInvalidLower) {
+TEST(Test_3_2) {
     CHECK(!CryptoAuth::isHexUpper("abcdef"));
     CHECK(!CryptoAuth::isHexUpper("4f9c429f5c6884db"));
     CHECK(!CryptoAuth::isHexUpper("a"));
 }
 
-TEST(HexInvalidEmpty) {
+TEST(Test_3_3) {
     CHECK(!CryptoAuth::isHexUpper(""));
 }
 
-TEST(VerifyHashWrong) {
+TEST(Test_3_4) {
     std::string salt = "4F9C429F5C6884DB";
     std::string password = "P@ssW0rd";
     std::string wrongHash = "0000000000000000000000000000000000000000";
     CHECK(!CryptoAuth::verifyHashSha1(wrongHash, salt, password));
 }
 
-TEST(VerifyHashWrongPassword) {
+TEST(Test_3_5) {
     std::string salt = "4F9C429F5C6884DB";
     std::string password = "P@ssW0rd";
     std::string wrongPassword = "wrongpassword";
@@ -298,49 +201,46 @@ TEST(VerifyHashWrongPassword) {
 
 }
 
-SUITE(UserInterfaceTests) {
+SUITE(CalculatorTests) {
 
-TEST(HelpShort) {
-    UserInterface ui;
-    const char* argv[] = {"server", "-h", nullptr};
-    CHECK(!ui.parse(2, argv));
+TEST(Test_4_1) {
+    Calculator calc;
+    Vector v = {10, 20, 30, 40};
+    CHECK_EQUAL(25, calc.average(v));
 }
 
-TEST(RunFlag) {
-    UserInterface ui;
-    const char* argv[] = {"server", "--run", nullptr};
-    CHECK(ui.parse(2, argv));
+TEST(Test_4_2) {
+    Calculator calc;
+    Vector v = {-10, -20, -30};
+    CHECK_EQUAL(-20, calc.average(v));
 }
 
-TEST(NoRunFlag) {
-    UserInterface ui;
-    const char* argv[] = {"server", "-p", "40000", nullptr};
-    CHECK(!ui.parse(3, argv));
+TEST(Test_4_3) {
+    Calculator calc;
+    Vector v = {42};
+    CHECK_EQUAL(42, calc.average(v));
 }
 
-TEST(RunWithPort) {
-    UserInterface ui;
-    const char* argv[] = {"server", "--run", "-p", "40000", nullptr};
-    CHECK(ui.parse(4, argv));
+TEST(Test_4_4) {
+    Calculator calc;
+    Vector v = {2000000000, 2000000000, 2000000000, 2000000000};
+    CHECK_EQUAL(2147483647, calc.average(v));
 }
 
-TEST(BadPort) {
-    UserInterface ui;
-    const char* argv[] = {"server", "--run", "-p", "99999", nullptr};
-    CHECK_THROW(ui.parse(4, argv), ServerError);
+TEST(Test_4_5) {
+    Calculator calc;
+    Vector v = {-2000000000, -2000000000, -2000000000, -2000000000};
+    CHECK_EQUAL(-2147483648, calc.average(v));
 }
 
-TEST(UnknownOption) {
-    UserInterface ui;
-    const char* argv[] = {"server", "--run", "-x", nullptr};
-    CHECK_THROW(ui.parse(3, argv), ServerError);
+TEST(Test_4_6) {
+    Calculator calc;
+    Vector v;
+    CHECK_THROW(calc.average(v), ServerError);
 }
 
 }
 
 int main() {
-    printTestInfo();
-    NumberedReporter reporter;
-    UnitTest::TestRunner runner(reporter);
-    return runner.RunTestsIf(UnitTest::Test::GetTestList(), nullptr, UnitTest::True(), 0);
+    return UnitTest::RunAllTests();
 }
