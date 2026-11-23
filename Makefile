@@ -30,8 +30,6 @@ TEST_OBJS = $(TEST_SRCS:.cpp=.o)
 
 all: $(TARGET)
 
-test: $(TEST_TARGET)
-
 $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
